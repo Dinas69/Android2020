@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Views.Update_reviews">
+
+    <TextView
+        android:id="@+id/tvTituloRevUpdate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingTop="40dp"
+        android:text="UPDATE"
+        android:textSize="25dp" />
+
+    <TextView
+        android:id="@+id/tvDescricaoRevUpdate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvTituloRevUpdate"
+        android:text="@string/tvDescricao" />
+
+    <EditText
+        android:id="@+id/etDescricaoUpdateRev"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvDescricaoRevUpdate" />
+
+    <TextView
+        android:id="@+id/tvScoreRevUpdate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etDescricaoUpdateRev"
+        android:text="@string/tvScore" />
+
+    <EditText
+        android:id="@+id/etScoreRevUpdate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvScoreRevUpdate"
+        android:inputType="numberDecimal" />
+
+    <Button
+        android:id="@+id/btnreviewUpdate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etScoreRevUpdate"
+        android:layout_weight="1"
+        android:onClick="ReviewsJogoRevUpdate"
+        android:text="Atualizar" />
+
+    <Button
+        android:id="@+id/btnreviewRemove"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnreviewUpdate"
+        android:layout_weight="1"
+        android:onClick="ReviewsJogoRevDelete"
+        android:text="Eliminar" />
+</RelativeLayout>

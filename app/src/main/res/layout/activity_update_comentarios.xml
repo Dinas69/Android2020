@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Views.Update_comentarios">
+
+    <TextView
+        android:id="@+id/tvTituloComUpdate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingTop="40dp"
+        android:text="UPDATE"
+        android:textSize="25dp" />
+
+    <TextView
+        android:id="@+id/tvDescricaoComUpdate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvTituloComUpdate"
+        android:text="@string/tvDescricao" />
+
+    <EditText
+        android:id="@+id/etDescricaoUpdateCom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvDescricaoComUpdate" />
+
+    <Button
+        android:id="@+id/btncomentUpdate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etDescricaoUpdateCom"
+        android:layout_weight="1"
+        android:onClick="ComentariosJogoComUpdate"
+        android:text="Atualizar" />
+
+    <Button
+        android:id="@+id/btncomentRemove"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btncomentUpdate"
+        android:layout_weight="1"
+        android:onClick="ComentariosJogoComDelete"
+        android:text="Eliminar" />
+</RelativeLayout>

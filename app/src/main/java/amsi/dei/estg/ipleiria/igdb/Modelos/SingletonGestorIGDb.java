@@ -53,6 +53,8 @@ public class SingletonGestorIGDb {
     private static final String mUrlAPILogin = "http://192.168.1.102:8888/v1/user/loginuser/";
     private static final String mUrlAPIComentariosAdd = "http://192.168.1.102:8888/v1/comentarios?access-token=";
     private static final String mUrlAPIReviewsAdd = "http://192.168.1.102:8888/v1/review?access-token=";
+    private static final String mUrlAPIReviewsPUT = "http://192.168.1.102:8888/v1/review/";
+    private static final String mUrlAPIComentariosPUT = "http://192.168.1.102:8888/v1/comentarios/";
 
     //LISTENERS
     private LoginListener loginListener;
@@ -86,6 +88,13 @@ public class SingletonGestorIGDb {
         for (Comentarios c : comentarios)
             if (c.getId() == id)
                 return c;
+        return null;
+    }
+
+    public Reviews getReview(int id) {
+        for (Reviews r : reviews)
+            if (r.getId() == id)
+                return r;
         return null;
     }
 
@@ -134,6 +143,53 @@ public class SingletonGestorIGDb {
         for (Reviews r : reviews) {
             adicionarReviewBD(r);
         }
+    }
+
+    //EDITAR
+    public void editarReviewBD(Reviews reviews) {
+        Reviews r = getReview(reviews.getId());
+
+        if (r != null) {
+            if (igDbHelper.editarReviewsBD(reviews)) {
+                r.setId_utilizador(reviews.getId_utilizador());
+                r.setData(reviews.getData());
+                r.setId_jogo(reviews.getId_jogo());
+                r.setScore(reviews.getScore());
+                r.setDescricao(reviews.getDescricao());
+            }
+        }
+
+    }
+
+    public void editarComentarioBD(Comentarios comentarios) {
+        Comentarios c = getComentario(comentarios.getId());
+
+        if (c != null) {
+            if (igDbHelper.editarComentarioBD(comentarios)) {
+                c.setId_utilizador(comentarios.getId_utilizador());
+                c.setData(comentarios.getData());
+                c.setId_jogo(comentarios.getId_jogo());
+                c.setDescricao(comentarios.getDescricao());
+            }
+        }
+
+    }
+
+    //REMOVER
+    public void removerReviewBD(int id) {
+        Reviews r = getReview(id);
+
+        if (r != null)
+            if (igDbHelper.removerReviewBD(id))
+                reviews.remove(r);
+    }
+
+    public void removerComentarioBD(int id) {
+        Comentarios c = getComentario(id);
+
+        if (c != null)
+            if (igDbHelper.removerComentarioBD(id))
+                comentarios.remove(c);
     }
 
     //API REVIEWS
@@ -335,6 +391,114 @@ public class SingletonGestorIGDb {
                 return params;
             }
         };
+        volleyQueue.add(req);
+    }
+
+    //API REVIEWS PUT
+    public void editarReviewAPI(final Reviews reviews, final Context context, final String token) {
+        Log.e("ONCLICKITEM", mUrlAPIReviewsPUT + reviews.getId() + "?access-token=" + token);
+        StringRequest req = new StringRequest(Request.Method.PUT, mUrlAPIReviewsPUT + reviews.getId() + "?access-token=" + token, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Reviews r = IGDbJsonParser.parserJsonReview(response);
+                editarReviewBD(r);
+
+                if (reviewsListener != null)
+                    reviewsListener.onRefreshDetalhes();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("Score", reviews.getScore());
+                params.put("Data", reviews.getData());
+                params.put("Descricao", reviews.getDescricao());
+                params.put("Id_Jogo", reviews.getId_jogo() + "");
+                params.put("Id_Utilizador", reviews.getId_utilizador() + "");
+                params.put("token", token);
+                return params;
+            }
+        };
+        volleyQueue.add(req);
+    }
+
+    //API REVIEWS DELETE
+    public void removerReviewAPI(final Reviews reviews, final Context context, String token) {
+        StringRequest req = new StringRequest(Request.Method.DELETE, mUrlAPIReviewsPUT + reviews.getId() + "?access-token=" + token, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                removerReviewBD(reviews.getId());
+
+                if (reviewsListener != null)
+                    reviewsListener.onRefreshDetalhes();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        volleyQueue.add(req);
+    }
+
+    //API COMENTARIOS PUT
+    public void editarComentarioAPI(final Comentarios comentarios, final Context context, final String token) {
+        Log.e("ONCLICKITEM", mUrlAPIReviewsPUT + comentarios.getId() + "?access-token=" + token);
+        StringRequest req = new StringRequest(Request.Method.PUT, mUrlAPIComentariosPUT + comentarios.getId() + "?access-token=" + token, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Comentarios c = IGDbJsonParser.parserJsonComentario(response);
+                editarComentarioBD(c);
+
+                if (comentListener != null)
+                    comentListener.onRefreshDetalhes();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("Data", comentarios.getData());
+                params.put("Descricao", comentarios.getDescricao());
+                params.put("Id_jogo", comentarios.getId_jogo() + "");
+                params.put("Id_utilizador", comentarios.getId_utilizador() + "");
+                params.put("token", token);
+                return params;
+            }
+        };
+        volleyQueue.add(req);
+    }
+
+    //API COMENTARIOS DELETE
+    public void removerComentarioAPI(final Comentarios comentarios, final Context context, String token) {
+        Log.e("ONCLICKITEM", mUrlAPIComentariosPUT + comentarios.getId() + "?access-token=" + token);
+        StringRequest req = new StringRequest(Request.Method.DELETE, mUrlAPIComentariosPUT + comentarios.getId() + "?access-token=" + token, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                removerComentarioBD(comentarios.getId());
+
+                if (comentListener != null)
+                    comentListener.onRefreshDetalhes();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
         volleyQueue.add(req);
     }
 }

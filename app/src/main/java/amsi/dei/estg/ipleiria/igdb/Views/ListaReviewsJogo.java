@@ -1,16 +1,23 @@
 package amsi.dei.estg.ipleiria.igdb.Views;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,6 +40,7 @@ public class ListaReviewsJogo extends AppCompatActivity implements ReviewsListen
     public static final String ID = "ID";
     public static final String PREF_INFO_USER = "PREF_INFO_USER";
     private int idjogo;
+    private String id_user, token;
 
     private ListView lvListaReviews;
     private EditText etDescricaorev, etScore;
@@ -46,6 +54,12 @@ public class ListaReviewsJogo extends AppCompatActivity implements ReviewsListen
 
         idjogo = getIntent().getIntExtra(ID, -1);
 
+        //GET SHARE
+        SharedPreferences sharedPrefInfoUser = getSharedPreferences(PREF_INFO_USER, Context.MODE_PRIVATE);
+        id_user = sharedPrefInfoUser.getString(ID_USER, "Sem Id");
+        token = sharedPrefInfoUser.getString(TOKEN, "Sem TOKEN");
+
+
         etDescricaorev = findViewById(R.id.etDescreview);
         etScore = findViewById(R.id.etScore);
         lvListaReviews = findViewById(R.id.lvListaReviews);
@@ -53,6 +67,40 @@ public class ListaReviewsJogo extends AppCompatActivity implements ReviewsListen
         SingletonGestorIGDb.getInstance(this).setReviewsListener(this);
         SingletonGestorIGDb.getInstance(this).getReviewsJogo(this, idjogo);
 
+        lvListaReviews.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Reviews r = SingletonGestorIGDb.getInstance(getApplicationContext()).getReview((int) id);
+                //VERIFICA SE O UTILIZADOR LOGADO PODE FAZER ALTERAÇÔES
+                if (Integer.parseInt(id_user) != r.getId_utilizador()) {
+                    Toast.makeText(getApplicationContext(), "Este comentário não é seu", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String descricao = ((TextView) view.findViewById(R.id.tvDescricaoRev)).getText().toString();
+                String score = ((TextView) view.findViewById(R.id.tvScoreRev)).getText().toString();
+
+                openActivityReviewsUpdate(id, descricao, score);
+            }
+        });
+
+    }
+
+    public void openActivityReviewsUpdate(long id, String descricao, String score) {
+        Intent intent = new Intent(this, Update_reviews.class);
+
+        intent.putExtra(Update_reviews.ID, (int) id);
+        intent.putExtra(Update_reviews.DESCRICAO, (String) descricao);
+        intent.putExtra(Update_reviews.SCORE, (String) score);
+        //SHARE USER SETTINGS
+        SharedPreferences sharedPrefUser2 = getSharedPreferences(Update_reviews.PREF_INFO_USER, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = sharedPrefUser2.edit();
+        editor2.putString(Update_reviews.TOKEN, token);
+        editor2.putString(Update_reviews.ID_USER, id_user);
+        editor2.putString(Update_reviews.ID_JOGO, String.valueOf(idjogo));
+        editor2.apply();
+        startActivity(intent);
     }
 
     @Override
@@ -129,4 +177,6 @@ public class ListaReviewsJogo extends AppCompatActivity implements ReviewsListen
 
         return true;
     }
+
+
 }

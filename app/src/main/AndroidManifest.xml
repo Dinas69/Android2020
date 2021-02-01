@@ -13,7 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IGDb"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Views.ListaReviewsJogo"></activity>
+        <activity android:name=".Views.Update_comentarios"></activity>
+        <activity android:name=".Views.Update_reviews" />
+        <activity android:name=".Views.ListaReviewsJogo" />
         <activity android:name=".Views.ListaCometariosJogo" />
         <activity android:name=".Views.DetalhesJogosActivity" />
         <activity

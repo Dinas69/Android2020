@@ -161,6 +161,49 @@ public class IGDbHelper extends SQLiteOpenHelper {
         return (nRows > 0);
     }
 
+    //UPDATE REVIEWS
+    public boolean editarReviewsBD(Reviews reviews) {
+
+        ContentValues values = new ContentValues();
+        values.put(ID_REVIEWS, reviews.getId());
+        values.put(DESCRICAO_REVIEWS, reviews.getDescricao());
+        values.put(ID_JOGO_REVIEWS, reviews.getId_jogo());
+        values.put(ID_UTILIZADOR_REVIEWS, reviews.getId_utilizador());
+        values.put(DATA_REVIEWS, reviews.getData());
+        values.put(SCORE_REVIEW, reviews.getScore());
+
+        int nRows = this.db.update(TABLE_NAME_4, values, "id = ?", new String[]{reviews.getId() + ""});
+
+        return (nRows > 0);
+    }
+
+    //DELETE REVIEW
+    public boolean removerReviewBD(int id) {
+        int nRows = this.db.delete(TABLE_NAME_4, "id = ?", new String[]{id + ""});
+        return (nRows > 0);
+    }
+
+    //UPDATE REVIEWS
+    public boolean editarComentarioBD(Comentarios comentarios) {
+
+        ContentValues values = new ContentValues();
+        values.put(ID_COMENT, comentarios.getId());
+        values.put(DESCRICAO_COMENT, comentarios.getDescricao());
+        values.put(ID_JOGO_COMNET, comentarios.getId_jogo());
+        values.put(ID_UTILIZADOR_COMENT, comentarios.getId_utilizador());
+        values.put(DATA_COMENT, comentarios.getData());
+
+        int nRows = this.db.update(TABLE_NAME_4, values, "id = ?", new String[]{comentarios.getId() + ""});
+
+        return (nRows > 0);
+    }
+
+    //DELETE COMENTARIO
+    public boolean removerComentarioBD(int id) {
+        int nRows = this.db.delete(TABLE_NAME_3, "id = ?", new String[]{id + ""});
+        return (nRows > 0);
+    }
+
     public void removeAllComentariosBD() {
         this.db.delete(TABLE_NAME_3, null, null);
     }
@@ -173,10 +216,6 @@ public class IGDbHelper extends SQLiteOpenHelper {
         this.db.delete(TABLE_NAME_1, null, null);
     }
 
-    public boolean removerComentarioBD(int id) {
-        int nRows = this.db.delete(TABLE_NAME_3, "id = ?", new String[]{id + ""});
-        return (nRows > 0);
-    }
 
     //OBTEM TODOS OS COMENTÁRIOS
     public ArrayList<Comentarios> getALLComentariosBD() {
