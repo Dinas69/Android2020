@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">IGDb</string>
+    <string name="etEmail">Introduza o e-mail</string>
+    <string name="etPassword">Introduza a password</string>
+    <string name="btnLogin">Login</string>
+    <string name="menuEstatico">Jogos lista</string>
+    <string name="menuDinamico">Jogos grelha</string>
+    <string name="stringEmail">Email</string>
+    <string name="ndOpen">Abrir</string>
+    <string name="ndClose">Fechar</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="tvNome">Nome</string>
+    <string name="tvData">Data</string>
+    <string name="tvTipojogo">Tipo de jogo</string>
+    <string name="btnComent">Comentarios</string>
+    <string name="btnReviews">Reviews</string>
+    <string name="tvUsername">Username</string>
+    <string name="tvDescricao">Descrição</string>
+    <string name="tvScore">Score</string>
+</resources>
