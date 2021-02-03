@@ -44,19 +44,24 @@ public class IGDbHelper extends SQLiteOpenHelper {
     private static final String DESCRICAO_REVIEWS = "descricao";
     private static final String ID_UTILIZADOR_REVIEWS = "id_utilizador";
     private static final String ID_JOGO_REVIEWS = "id_jogo";
+    //TABELA REVIEWS
+    private static final String TABLE_NAME_5 = "uploads";
+    private static final String ID_UP = "id";
+    private static final String NOME_UP = "nome";
+    private static final String PATH_UP = "path";
+    private static final String ID_USER_UP = "id_user";
 
     private final SQLiteDatabase db;
 
     public IGDbHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
         this.db = this.getWritableDatabase();
-        // db.execSQL("DROP DATABASE IGDb");
+        //db.execSQL("DROP DATABASE IGDb");
         //context.deleteDatabase(DB_NAME);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.e("SQLITE22", "Estou no SQLITE");
         //código sql de criação de tabela
         String createTableJogos = "CREATE TABLE " + TABLE_NAME_1 + "( " +
                 ID_JOGO + " INTEGER PRIMARY KEY, " +
@@ -91,6 +96,13 @@ public class IGDbHelper extends SQLiteOpenHelper {
                 ID_JOGO_REVIEWS + " INTEGER NOT NULL, " +
                 DESCRICAO_REVIEWS + " TEXT NOT NULL);";
         db.execSQL(createTableReviews);
+
+        String createTableUpload = "CREATE TABLE " + TABLE_NAME_5 + "( " +
+                ID_UP + " INTEGER PRIMARY KEY, " +
+                PATH_UP + " TEXT NOT NULL, " +
+                NOME_UP + " TEXT NOT NULL, " +
+                ID_USER_UP + " INTEGER NOT NULL);";
+        db.execSQL(createTableUpload);
     }
 
     @Override
@@ -109,7 +121,6 @@ public class IGDbHelper extends SQLiteOpenHelper {
     /*****CRUD*****/
     //JOGOS
     public void adicionarJogoBD(Jogos jogos) {
-        Log.e("TesteAdicionar", "test");
         ContentValues values = new ContentValues();
         values.put(ID_JOGO, jogos.getId());
         values.put(NOME_JOGO, jogos.getNome());
@@ -121,7 +132,6 @@ public class IGDbHelper extends SQLiteOpenHelper {
         values.put(ID_TIPOJOGO_JOGO, jogos.getId_jogo());
 
         this.db.insert(TABLE_NAME_1, null, values);
-
     }
 
     //COMENTARIOS
@@ -135,6 +145,7 @@ public class IGDbHelper extends SQLiteOpenHelper {
         this.db.insert(TABLE_NAME_3, null, values);
     }
 
+
     //REVIEWS
     public void addReviewsBD(Reviews reviews) {
         ContentValues values = new ContentValues();
@@ -147,18 +158,14 @@ public class IGDbHelper extends SQLiteOpenHelper {
         this.db.insert(TABLE_NAME_4, null, values);
     }
 
-    public boolean editarComentariosBD(Comentarios comentarios) {
-
+    //UPLOAD
+    public void addUploadBD(Uploadimagem uploadimagem) {
         ContentValues values = new ContentValues();
-        values.put(ID_COMENT, comentarios.getId());
-        values.put(DESCRICAO_COMENT, comentarios.getDescricao());
-        values.put(ID_JOGO_COMNET, comentarios.getId_jogo());
-        values.put(ID_UTILIZADOR_COMENT, comentarios.getId_utilizador());
-        values.put(DATA_COMENT, comentarios.getData());
-
-        int nRows = this.db.update(TABLE_NAME_3, values, "id = ?", new String[]{comentarios.getId() + ""});
-
-        return (nRows > 0);
+        values.put(ID_UP, uploadimagem.getId());
+        values.put(NOME_UP, uploadimagem.getNome());
+        values.put(PATH_UP, uploadimagem.getPath());
+        values.put(ID_USER_UP, uploadimagem.getId_user());
+        this.db.insert(TABLE_NAME_5, null, values);
     }
 
     //UPDATE REVIEWS
@@ -183,7 +190,7 @@ public class IGDbHelper extends SQLiteOpenHelper {
         return (nRows > 0);
     }
 
-    //UPDATE REVIEWS
+    //UPDATE COMENTARIOS
     public boolean editarComentarioBD(Comentarios comentarios) {
 
         ContentValues values = new ContentValues();
@@ -214,6 +221,9 @@ public class IGDbHelper extends SQLiteOpenHelper {
 
     public void removeAllJogosBD() {
         this.db.delete(TABLE_NAME_1, null, null);
+    }
+    public void removeAllUploadsBD() {
+        this.db.delete(TABLE_NAME_5, null, null);
     }
 
 
@@ -260,5 +270,20 @@ public class IGDbHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return jogos;
+    }
+
+    //OBTEM TODOS OS JOGOS
+    public ArrayList<Uploadimagem> getALLUploadsBD() {
+        ArrayList<Uploadimagem> uploadimagems = new ArrayList<>();
+        Cursor cursor = this.db.query(TABLE_NAME_5, new String[]{ID_UP, ID_USER_UP, PATH_UP, NOME_UP}, null, null, null, null, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Uploadimagem auxUpload = new Uploadimagem(cursor.getInt(0), cursor.getInt(1), cursor.getString(2), cursor.getString(3));
+                uploadimagems.add(auxUpload);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return uploadimagems;
     }
 }

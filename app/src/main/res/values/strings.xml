@@ -4,7 +4,7 @@
     <string name="etPassword">Introduza a password</string>
     <string name="btnLogin">Login</string>
     <string name="menuEstatico">Jogos lista</string>
-    <string name="menuDinamico">Jogos grelha</string>
+    <string name="menuDinamico">Upload Photo</string>
     <string name="stringEmail">Email</string>
     <string name="ndOpen">Abrir</string>
     <string name="ndClose">Fechar</string>
@@ -18,4 +18,6 @@
     <string name="tvUsername">Username</string>
     <string name="tvDescricao">Descrição</string>
     <string name="tvScore">Score</string>
+    <string name="tvUploadNome">Nome</string>
+    <string name="tvUploadUser">Id user</string>
 </resources>

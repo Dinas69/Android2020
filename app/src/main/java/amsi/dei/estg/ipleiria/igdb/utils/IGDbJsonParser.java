@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import amsi.dei.estg.ipleiria.igdb.Modelos.Comentarios;
 import amsi.dei.estg.ipleiria.igdb.Modelos.Jogos;
 import amsi.dei.estg.ipleiria.igdb.Modelos.Reviews;
+import amsi.dei.estg.ipleiria.igdb.Modelos.Uploadimagem;
 
 public class IGDbJsonParser {
 
@@ -40,6 +41,24 @@ public class IGDbJsonParser {
             e.printStackTrace();
         }
         return jogos;
+    }
+    public static ArrayList<Uploadimagem> parserJsonUploads(JSONArray response) {
+        ArrayList<Uploadimagem> uploadimagems = new ArrayList<>();
+        try {
+            for (int i = 0; i < response.length(); i++) {
+                JSONObject upload = (JSONObject) response.get(i);
+                int id = upload.getInt("id");
+                String nome = upload.getString("nome");
+                String path = upload.getString("path");
+                int id_user = upload.getInt("id_user");
+
+                Uploadimagem auxJogo = new Uploadimagem(id, id_user, path, nome);
+                uploadimagems.add(auxJogo);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return uploadimagems;
     }
 
     public static ArrayList<Comentarios> parserJsonComentarios(JSONArray response) {
@@ -167,5 +186,31 @@ public class IGDbJsonParser {
         }
 
         return auxrev;
+    }
+
+    public static Uploadimagem parserJsonUpload(String response) {
+        Uploadimagem auxup = null;
+
+        try {
+            JSONObject upload = new JSONObject(response);
+            int id = upload.getInt("id");
+            Log.e("REVIEWSTESTE", String.valueOf(id));
+
+            String nome = upload.getString("nome");
+            Log.e("REVIEWSTESTE", nome);
+
+            String path = upload.getString("path");
+            Log.e("REVIEWSTESTE", path);
+
+            int id_utilizador = upload.getInt("id_user");
+            Log.e("REVIEWSTESTE", String.valueOf(id_utilizador));
+
+            auxup = new Uploadimagem(id, id_utilizador, path, nome);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return auxup;
     }
 }

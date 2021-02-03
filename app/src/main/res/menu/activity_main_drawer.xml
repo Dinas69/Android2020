@@ -6,11 +6,11 @@
     <group android:checkableBehavior ="single">
 
         <item
-            android:id="@+id/nav_estatico"
+            android:id="@+id/nav_Lista_jogo"
             android:icon="@drawable/ic_menu_estatico"
             android:title="@string/menuEstatico" />
         <item
-            android:id="@+id/nav_dinamico"
+            android:id="@+id/nav_upload_imagem"
             android:icon="@drawable/ic_menu_dinamico"
             android:title="@string/menuDinamico" />
     </group>

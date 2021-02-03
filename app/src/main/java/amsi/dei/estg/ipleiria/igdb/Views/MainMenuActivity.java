@@ -8,6 +8,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -51,13 +52,29 @@ public class MainMenuActivity extends AppCompatActivity implements NavigationVie
     }
 
     private void carregarFragmentoInicial() {
-        navigationView.setCheckedItem(R.id.nav_estatico);
+        navigationView.setCheckedItem(R.id.nav_Lista_jogo);
         Fragment fragment = new ListaJogosFragment();
         fragmentManager.beginTransaction().replace(R.id.contentFragment, fragment).commit();
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Fragment fragment = null;
+        switch (item.getItemId()) {
+            case R.id.nav_Lista_jogo:
+                fragment = new ListaJogosFragment();
+                setTitle(item.getTitle());
+                break;
+            case R.id.nav_upload_imagem:
+                Intent intent = new Intent(this, Upload_imagem.class);
+                startActivity(intent);
+                //fragment = new DinamicoFragment();
+                //setTitle(item.getTitle());
+                break;
+            case R.id.nav_email:
+                System.out.println("-->Nav Email");
+                break;
+        }
         return false;
     }
 }

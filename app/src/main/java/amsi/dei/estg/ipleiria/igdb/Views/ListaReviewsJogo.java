@@ -173,8 +173,6 @@ public class ListaReviewsJogo extends AppCompatActivity implements ReviewsListen
             }
         }
 
-        Log.e("REVIEWSTESTE", scor + ":");
-
         return true;
     }
 

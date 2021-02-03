@@ -27,18 +27,17 @@ import amsi.dei.estg.ipleiria.igdb.Listeners.ComentListener;
 import amsi.dei.estg.ipleiria.igdb.Listeners.JogosListener;
 import amsi.dei.estg.ipleiria.igdb.Listeners.LoginListener;
 import amsi.dei.estg.ipleiria.igdb.Listeners.ReviewsListener;
+import amsi.dei.estg.ipleiria.igdb.Listeners.UploadListener;
 import amsi.dei.estg.ipleiria.igdb.R;
+import amsi.dei.estg.ipleiria.igdb.Views.Upload_imagem;
 import amsi.dei.estg.ipleiria.igdb.utils.IGDbJsonParser;
 
 public class SingletonGestorIGDb {
 
-    private static final int ADICIONAR_BD = 1;
-    private static final int EDITAR_BD = 2;
-    private static final int REMOVER_BD = 3;
-
     private static SingletonGestorIGDb instance = null;
 
     private ArrayList<Jogos> jogos;
+    private ArrayList<Uploadimagem> uploadimagems;
     private ArrayList<Comentarios> comentarios;
     private ArrayList<Reviews> reviews;
     private IGDbHelper igDbHelper;
@@ -55,12 +54,15 @@ public class SingletonGestorIGDb {
     private static final String mUrlAPIReviewsAdd = "http://192.168.1.102:8888/v1/review?access-token=";
     private static final String mUrlAPIReviewsPUT = "http://192.168.1.102:8888/v1/review/";
     private static final String mUrlAPIComentariosPUT = "http://192.168.1.102:8888/v1/comentarios/";
+    private static final String mUrlAPIUploadPUT = "http://192.168.1.102:8888/v1/uploadimagem";
+    private static final String mUrlAPIUploads = "http://192.168.1.102:8888/v1/uploadimagem?access-token=F2_v997ZflzhGaY63aKMiY-MCHYNKogP";
 
     //LISTENERS
     private LoginListener loginListener;
     private JogosListener jogosListener;
     private ComentListener comentListener;
     private ReviewsListener reviewsListener;
+    private UploadListener uploadListener;
 
     public static synchronized SingletonGestorIGDb getInstance(Context context) {
         if (instance == null) {
@@ -111,6 +113,10 @@ public class SingletonGestorIGDb {
         this.reviewsListener = reviewsListener;
     }
 
+    public void setUploadsListener(UploadListener uploadsListener) {
+        this.uploadListener = uploadsListener;
+    }
+
     //ADICIONAR JOGO Á BASE DE DADOS
     public void adicionarJogoBD(Jogos jogos) {
         igDbHelper.adicionarJogoBD(jogos);
@@ -124,10 +130,21 @@ public class SingletonGestorIGDb {
         igDbHelper.addReviewsBD(reviews);
     }
 
+    public void adicionarUploadBD(Uploadimagem uploadimagem) {
+        igDbHelper.addUploadBD(uploadimagem);
+    }
+
     public void adicionarJogosBD(ArrayList<Jogos> jogos) {
         igDbHelper.removeAllJogosBD();
         for (Jogos j : jogos) {
             adicionarJogoBD(j);
+        }
+    }
+
+    public void adicionarUploadsBD(ArrayList<Uploadimagem> uploadimagems) {
+        igDbHelper.removeAllUploadsBD();
+        for (Uploadimagem u : uploadimagems) {
+            adicionarUploadBD(u);
         }
     }
 
@@ -375,7 +392,6 @@ public class SingletonGestorIGDb {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("REVIEWSTESTE", error.toString());
                 Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
             }
         }) {
@@ -483,7 +499,6 @@ public class SingletonGestorIGDb {
 
     //API COMENTARIOS DELETE
     public void removerComentarioAPI(final Comentarios comentarios, final Context context, String token) {
-        Log.e("ONCLICKITEM", mUrlAPIComentariosPUT + comentarios.getId() + "?access-token=" + token);
         StringRequest req = new StringRequest(Request.Method.DELETE, mUrlAPIComentariosPUT + comentarios.getId() + "?access-token=" + token, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -500,5 +515,66 @@ public class SingletonGestorIGDb {
             }
         });
         volleyQueue.add(req);
+    }
+
+    //API UPLOAD ADD
+    public void uploadImagemAPI(Uploadimagem uploadimagem, final Context context, String token) {
+        Log.e("UPLOAD", mUrlAPIUploadPUT + "?access-token=" + token);
+        StringRequest req = new StringRequest(Request.Method.POST, mUrlAPIUploadPUT + "?access-token=" + token, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Uploadimagem u = IGDbJsonParser.parserJsonUpload(response);
+                adicionarUploadBD(u);
+
+                if (uploadListener != null)
+                    uploadListener.onRefreshDetalhes();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("nome", uploadimagem.getNome() + "");
+                params.put("path", uploadimagem.getPath() + "");
+                params.put("id_user", uploadimagem.getId_user() + "");
+                params.put("token", token);
+                return params;
+            }
+        };
+        volleyQueue.add(req);
+    }
+
+    //API UPLOADS GET
+    public void getAllUploadAPI(final Context context) {
+        if (!IGDbJsonParser.isConnectionInternet(context)) {
+            Toast.makeText(context, "Não existe ligação à internet.", Toast.LENGTH_SHORT).show();
+
+            if (uploadListener != null)
+                uploadListener.onRefreshListaUpload(igDbHelper.getALLUploadsBD());
+        } else {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, mUrlAPIUploads, null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    uploadimagems = IGDbJsonParser.parserJsonUploads(response);
+                    adicionarUploadsBD(uploadimagems);
+
+                    if (uploadListener != null)
+                        uploadListener.onRefreshListaUpload(uploadimagems);
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+            volleyQueue.add(req);
+        }
+
     }
 }

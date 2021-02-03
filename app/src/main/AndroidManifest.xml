@@ -4,20 +4,31 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.IGDb"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Views.Update_comentarios"></activity>
+
+        <activity android:name=".Views.ListaUploads"></activity>
+        <activity android:name=".Views.Upload_imagem" />
+        <activity android:name=".Views.DetalhesJogosActivity" />
+        <activity android:name=".Views.Update_comentarios" />
         <activity android:name=".Views.Update_reviews" />
         <activity android:name=".Views.ListaReviewsJogo" />
         <activity android:name=".Views.ListaCometariosJogo" />
-        <activity android:name=".Views.DetalhesJogosActivity" />
         <activity
             android:name=".Views.MainMenuActivity"
             android:launchMode="singleTop"
