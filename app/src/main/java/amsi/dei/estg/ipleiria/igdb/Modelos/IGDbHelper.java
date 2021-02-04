@@ -210,6 +210,11 @@ public class IGDbHelper extends SQLiteOpenHelper {
         int nRows = this.db.delete(TABLE_NAME_3, "id = ?", new String[]{id + ""});
         return (nRows > 0);
     }
+    //DELETE UPLOAD SINGLE
+    public boolean removerUploadBD(int id) {
+        int nRows = this.db.delete(TABLE_NAME_5, "id = ?", new String[]{id + ""});
+        return (nRows > 0);
+    }
 
     public void removeAllComentariosBD() {
         this.db.delete(TABLE_NAME_3, null, null);

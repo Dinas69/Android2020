@@ -21,8 +21,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IGDb"
         android:usesCleartextTraffic="true">
-
-        <activity android:name=".Views.ListaUploads"></activity>
+        <activity android:name=".Views.Delete_upload"></activity>
+        <activity android:name=".Views.ListaUploads" />
         <activity android:name=".Views.Upload_imagem" />
         <activity android:name=".Views.DetalhesJogosActivity" />
         <activity android:name=".Views.Update_comentarios" />

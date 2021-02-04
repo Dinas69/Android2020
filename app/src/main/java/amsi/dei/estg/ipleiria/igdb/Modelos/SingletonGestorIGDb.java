@@ -55,7 +55,8 @@ public class SingletonGestorIGDb {
     private static final String mUrlAPIReviewsPUT = "http://192.168.1.102:8888/v1/review/";
     private static final String mUrlAPIComentariosPUT = "http://192.168.1.102:8888/v1/comentarios/";
     private static final String mUrlAPIUploadPUT = "http://192.168.1.102:8888/v1/uploadimagem";
-    private static final String mUrlAPIUploads = "http://192.168.1.102:8888/v1/uploadimagem?access-token=F2_v997ZflzhGaY63aKMiY-MCHYNKogP";
+    private static final String mUrlAPIUploads = "http://192.168.1.102:8888/v1/uploadimagem/uploadimagem/";
+    private static final String mUrlAPIUploadsdelete = "http://192.168.1.102:8888/v1/uploadimagem/";
 
     //LISTENERS
     private LoginListener loginListener;
@@ -90,6 +91,14 @@ public class SingletonGestorIGDb {
         for (Comentarios c : comentarios)
             if (c.getId() == id)
                 return c;
+        return null;
+    }
+
+    //Get single upload
+    public Uploadimagem getUpload(int id) {
+        for (Uploadimagem u : uploadimagems)
+            if (u.getId() == id)
+                return u;
         return null;
     }
 
@@ -207,6 +216,14 @@ public class SingletonGestorIGDb {
         if (c != null)
             if (igDbHelper.removerComentarioBD(id))
                 comentarios.remove(c);
+    }
+
+    public void removerUploadBD(int id) {
+        Uploadimagem u = getUpload(id);
+
+        if (u != null)
+            if (igDbHelper.removerUploadBD(id))
+                uploadimagems.remove(u);
     }
 
     //API REVIEWS
@@ -550,14 +567,14 @@ public class SingletonGestorIGDb {
     }
 
     //API UPLOADS GET
-    public void getAllUploadAPI(final Context context) {
+    public void getAllUploadAPI(final Context context, String id_user, String token) {
         if (!IGDbJsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, "Não existe ligação à internet.", Toast.LENGTH_SHORT).show();
-
+            Log.e("UPLOAD", mUrlAPIUploads + id_user + "?access-token=" + token);
             if (uploadListener != null)
                 uploadListener.onRefreshListaUpload(igDbHelper.getALLUploadsBD());
         } else {
-            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, mUrlAPIUploads, null, new Response.Listener<JSONArray>() {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, mUrlAPIUploads + id_user + "?access-token=" + token, null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray response) {
                     uploadimagems = IGDbJsonParser.parserJsonUploads(response);
@@ -575,6 +592,25 @@ public class SingletonGestorIGDb {
             });
             volleyQueue.add(req);
         }
+    }
 
+    //API UPLOAD DELETE
+    public void removerUploadAPI(final Uploadimagem uploadimagem, final Context context, String token, String id) {
+        StringRequest req = new StringRequest(Request.Method.DELETE, mUrlAPIUploadsdelete + id + "?access-token=" + token, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                removerUploadBD(uploadimagem.getId());
+
+                if (uploadListener != null)
+                    uploadListener.onRefreshDetalhes();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        volleyQueue.add(req);
     }
 }

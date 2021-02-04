@@ -42,14 +42,11 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     }
 
     public void onClickLogin(View view) {
-        Log.e("Onclicklogin", "true");
         if (IGDbJsonParser.isConnectionInternet(getApplicationContext())) {
-            Log.e("Onclicklogin", "dentro if");
             //Verificar se a password tem pelo menos 4 carateres
             // se o email é valido
             String email = etEmail.getText().toString();
             String password = etPassword.getText().toString();
-            Log.e("Onclicklogin44", email);
             if (!isUsernameNull(email)) {
                 etEmail.setError("Username Invalido");
                 return;
@@ -60,9 +57,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
             }
 
             SingletonGestorIGDb.getInstance(getApplicationContext()).loginAPI(email, password, getApplicationContext());
-            Log.e("Onclicklogin", "SINGLETON COMPLETO");
         } else {
-            Log.e("Onclicklogin", "fora if");
             Toast.makeText(getApplicationContext(), "Sem acesso há internet", Toast.LENGTH_SHORT).show();
         }
     }
@@ -83,7 +78,6 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
     @Override
     public void onValidateLogin(String token, String email, String id) {
-        Log.e("Onclicklogin22", "onValidateLogin" + token);
         if (token != "fail") {
             //CODIGO PARA MUDAR DE ACTIVIDADE
             guardarInfoSharedPref(token, email, id);
@@ -113,5 +107,12 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         editor2.putString(ListaReviewsJogo.TOKEN, token);
         editor2.putString(ListaReviewsJogo.ID_USER, id);
         editor2.apply();
+
+        //Para galeria
+        SharedPreferences sharedPreferences3 = getSharedPreferences(Upload_imagem.PREF_INFO_USER, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor3 = sharedPreferences3.edit();
+        editor3.putString(Upload_imagem.TOKEN, token);
+        editor3.putString(Upload_imagem.ID_USER, id);
+        editor3.apply();
     }
 }

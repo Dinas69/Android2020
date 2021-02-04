@@ -7,6 +7,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -60,9 +61,16 @@ import amsi.dei.estg.ipleiria.igdb.R;
 
 public class Upload_imagem extends AppCompatActivity implements View.OnClickListener {
 
+
+    public static final String PREF_INFO_USER = "PREF_INFO_USER";
+    public static final String TOKEN = "TOKEN";
+    public static final String ID_USER = "ID_USER";
+
     public static final String KEY_User_Document1 = "doc1";
     ImageView IDProf;
     Button Upload_Btn;
+    //USER
+    private String id_user, token;
 
     private String Document_img1 = "";
     IGDbHelper igDbHelper;
@@ -75,6 +83,11 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_imagem);
+
+        //GET SHARE
+        SharedPreferences sharedPrefInfoUser = getSharedPreferences(PREF_INFO_USER, Context.MODE_PRIVATE);
+        id_user = sharedPrefInfoUser.getString(ID_USER, "Sem Id");
+        token = sharedPrefInfoUser.getString(TOKEN, "Sem TOKEN");
 
         IDProf = (ImageView) findViewById(R.id.IdProf);
         Upload_Btn = (Button) findViewById(R.id.UploadBtn);
@@ -141,10 +154,10 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
                         Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
                         startActivityForResult(cameraIntent, 1);
 
-                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                       /* Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         File f = new File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg");
                         //intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));*/
-                        startActivityForResult(intent, 1);
+                        /*startActivityForResult(intent, 1);*/
                     } else if (options[item].equals("Escolhe na galeria")) {
                         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         startActivityForResult(intent, 2);
@@ -201,9 +214,6 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
                 photo.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
                 String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), photo, obtemNome, null);
 
-
-                Log.e("WHASAPP", path);
-
                 //obtem a STRING do Bitmap e convert para Uri
                 Uri selectedImage = Uri.parse(path);
                 //GET PATH
@@ -215,7 +225,6 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
                 picturePath = c.getString(columnIndex);
                 c.close();
 
-                Log.e("WHASAPP", "2" + picturePath);
                 //GET NAME
                 String[] filePath2 = {MediaStore.Images.Media.DISPLAY_NAME};
                 Cursor c2 = getContentResolver().query(selectedImage, filePath2, null, null, null);
@@ -278,7 +287,7 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
         if (Document_img1.equals("") || Document_img1.equals(null)) {
             ContextThemeWrapper ctw = new ContextThemeWrapper(Upload_imagem.this, R.style.Theme_AppCompat);
             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ctw);
-            alertDialogBuilder.setTitle("Can't Empty");
+            alertDialogBuilder.setTitle("Empty");
             alertDialogBuilder.setMessage("Não pode mandar este valor null, por favor insira uma imagem.");
             alertDialogBuilder.setPositiveButton("ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
@@ -288,21 +297,18 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
             alertDialogBuilder.show();
             return;
         } else {
-           /* final ProgressDialog loading = new ProgressDialog(Upload_imagem.this);
-            loading.setMessage("Please Wait...");
-            loading.show();
-            loading.setCanceledOnTouchOutside(false);*/
             try {
 
                 Uploadimagem conteudo = new Uploadimagem();
-                String token = "F2_v997ZflzhGaY63aKMiY-MCHYNKogP";
-
+                //Conteudo para o POST
                 conteudo.setNome(nomeImagem);
                 conteudo.setPath(picturePath);
-                conteudo.setId_user(1);
-
+                conteudo.setId_user(Integer.parseInt(id_user));
+                //POST do upload
                 SingletonGestorIGDb.getInstance(getApplicationContext()).uploadImagemAPI(conteudo, getApplicationContext(), token);
+                //Mensagem de sucesso
                 Toast.makeText(getApplicationContext(), "Enviado com sucesso", Toast.LENGTH_SHORT).show();
+                //Reset ImageView
                 ImageView imageView = findViewById(R.id.IdProf);
                 imageView.setImageResource(R.drawable.ic_baseline_add_a_photo_24);
             } catch (Exception e) {
@@ -313,6 +319,8 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
 
     public void OpenGaleria(View view) {
         Intent intent = new Intent(this, ListaUploads.class);
+        intent.putExtra("id_user", String.valueOf(id_user));
+        intent.putExtra("token", token);
         startActivity(intent);
     }
 }
