@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -49,6 +50,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import amsi.dei.estg.ipleiria.igdb.Listeners.UploadListener;
 import amsi.dei.estg.ipleiria.igdb.Modelos.IGDbHelper;
@@ -84,17 +86,23 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (getApplicationContext().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 
-                        Toast.makeText(Upload_imagem.this, "Permission granted", Toast.LENGTH_SHORT).show();
-                        selectImage();
+                       /* Toast.makeText(Upload_imagem.this, "Permission granted", Toast.LENGTH_SHORT).show();
+                        selectImage();*/
                     } else {
                         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                        //requestPermissions(new String[]{Manifest.permission.CAMERA}, 2);
+                    }
+                    if (getApplicationContext().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+
+                       /* Toast.makeText(Upload_imagem.this, "Camera permission granted", Toast.LENGTH_SHORT).show();
+                        selectImage();*/
+                    } else {
+                        requestPermissions(new String[]{Manifest.permission.CAMERA}, 2);
                     }
                 } else {
                     Toast.makeText(Upload_imagem.this, "Permission granted", Toast.LENGTH_SHORT).show();
-                    selectImage();
                 }
-
-
+                selectImage();
             }
         });
 
@@ -107,30 +115,44 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
 
         if (requestCode == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(Upload_imagem.this, "Permission granted", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(Upload_imagem.this, "Permission granted", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(Upload_imagem.this, "Permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+        if (requestCode == 2) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //Toast.makeText(Upload_imagem.this, "Camera permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(Upload_imagem.this, "Camera permission denied", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     private void selectImage() {
-        final CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
+        final CharSequence[] options = {"Tirar foto", "Escolhe na galeria", "Cancelar"};
         AlertDialog.Builder builder = new AlertDialog.Builder(Upload_imagem.this);
-        builder.setTitle("Add Photo!");
+        builder.setTitle("Adicionar foto!");
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int item) {
-                if (options[item].equals("Take Photo")) {
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    File f = new File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg");
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-                    startActivityForResult(intent, 1);
-                } else if (options[item].equals("Choose from Gallery")) {
-                    Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(intent, 2);
-                } else if (options[item].equals("Cancel")) {
-                    dialog.dismiss();
+                try {
+                    if (options[item].equals("Tirar foto")) {
+                        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(cameraIntent, 1);
+
+                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        File f = new File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg");
+                        //intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));*/
+                        startActivityForResult(intent, 1);
+                    } else if (options[item].equals("Escolhe na galeria")) {
+                        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(intent, 2);
+                    } else if (options[item].equals("Cancelar")) {
+                        dialog.dismiss();
+                    }
+                } catch (Exception e) {
+                    Log.e("ERROR", e.getMessage());
                 }
             }
         });
@@ -165,27 +187,67 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
                 ParcelFileDescriptor pfd = getApplicationContext().getContentResolver().openFileDescriptor(selectedImage, "r");
                 Bitmap bitmap2 = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
 
-                File imgFile = new File(picturePath);
-                if (imgFile.exists()) {
-                    Log.e("asdasd", "aqui");
-                }
-                Log.e("asdasd", selectedImage.toString());
-                Log.e("asdasd", picturePath);
-                copyFile("C:\\Users\\Bruno Leopoldo Dinas\\Desktop\\IGDb_AMSI\\app\\src\\uploads", picturePath);
-
-                //picturePath = selectedImage.toString();
-                Log.e("teste3232", picturePath);
                 bitmap2 = getResizedBitmap(bitmap2, 400);
                 IDProf.setImageBitmap(bitmap2);
                 BitMapToString(bitmap2);
-            } else {
+            } else if (requestCode == 1) {
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+                IDProf.setImageBitmap(photo);
+
+                //Cria o nome para a foto
+                String obtemNome = random2();
+                //Convert Bitmap to String
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                photo.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), photo, obtemNome, null);
+
+
+                Log.e("WHASAPP", path);
+
+                //obtem a STRING do Bitmap e convert para Uri
+                Uri selectedImage = Uri.parse(path);
+                //GET PATH
+                String[] filePath = {MediaStore.Images.Media.DATA};
+                Cursor c = getContentResolver().query(selectedImage, filePath, null, null, null);
+                c.moveToFirst();
+                //SET PATH
+                int columnIndex = c.getColumnIndex(filePath[0]);
+                picturePath = c.getString(columnIndex);
+                c.close();
+
+                Log.e("WHASAPP", "2" + picturePath);
+                //GET NAME
+                String[] filePath2 = {MediaStore.Images.Media.DISPLAY_NAME};
+                Cursor c2 = getContentResolver().query(selectedImage, filePath2, null, null, null);
+                c2.moveToFirst();
+
+                //SET NAME
+                int nameIndex = c2.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                nomeImagem = c2.getString(nameIndex);
+                c2.close();
+
+                ParcelFileDescriptor pfd = getApplicationContext().getContentResolver().openFileDescriptor(selectedImage, "r");
+                Bitmap bitmap2 = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+
+                bitmap2 = getResizedBitmap(bitmap2, 400);
+                IDProf.setImageBitmap(bitmap2);
+                BitMapToString(bitmap2);
+
                 return;
             }
         } catch (Exception e) {
             Log.e("UPLOAD2", e + "");
         }
+    }
 
-
+    private static String random2() {
+        String ALLOWED_CHARACTERS = "0123456789qwertyuiopasdfghjklzxcvbnm";
+        int sizeOfRandomString = 40;
+        final Random random = new Random();
+        final StringBuilder sb = new StringBuilder(sizeOfRandomString);
+        for (int i = 0; i < sizeOfRandomString; ++i)
+            sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
+        return sb.toString();
     }
 
     public String BitMapToString(Bitmap userImage1) {
@@ -209,36 +271,6 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
             width = (int) (height * bitmapRatio);
         }
         return Bitmap.createScaledBitmap(image, width, height, true);
-    }
-
-    public static void copyFile(String inputPath, String outputPath) {
-
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            in = new FileInputStream(inputPath);
-            out = new FileOutputStream(outputPath);
-
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            in = null;
-
-            // write the output file (You have now copied the file)
-            out.flush();
-            out.close();
-            out = null;
-
-            Log.e("Copied file to ", outputPath);
-
-        } catch (FileNotFoundException fnfe1) {
-            Log.e("", fnfe1.getMessage());
-        } catch (Exception e) {
-            Log.e("tag", e.getMessage());
-        }
     }
 
     @Override
@@ -271,6 +303,8 @@ public class Upload_imagem extends AppCompatActivity implements View.OnClickList
 
                 SingletonGestorIGDb.getInstance(getApplicationContext()).uploadImagemAPI(conteudo, getApplicationContext(), token);
                 Toast.makeText(getApplicationContext(), "Enviado com sucesso", Toast.LENGTH_SHORT).show();
+                ImageView imageView = findViewById(R.id.IdProf);
+                imageView.setImageResource(R.drawable.ic_baseline_add_a_photo_24);
             } catch (Exception e) {
                 Log.e("UPLOAD", e.getMessage());
             }

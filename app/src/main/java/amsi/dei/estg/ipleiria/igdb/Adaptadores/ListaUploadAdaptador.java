@@ -94,25 +94,18 @@ public class ListaUploadAdaptador extends BaseAdapter {
                 tvUploadNome.setText(String.valueOf(uploadimagems.getNome()));
                 tvUploadUser.setText(uploadimagems.getId_user() + "");
 
+                //ontem PATH da imagem
                 String string = uploadimagems.getPath();
+                //Cria um ficheiro com o caminho da imagem
                 File imgFile = new File(string);
-
+                //Verifica se existe
                 if (imgFile.exists()) {
-                    //Uri selectedImage = Uri.parse("file://" + string);
-                   // Uri selectedImage2 = Uri.fromFile(new File(string));
-
-                    //ParcelFileDescriptor pfd = context.getApplicationContext().getContentResolver().openFileDescriptor(selectedImage2, "r");
-                    //decode
-                    //Bitmap bitmap2 = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
-
+                    //Decode
                     Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-
+                    //Resize
                     myBitmap = getResizedBitmap(myBitmap, 400);
-
-                    //bitmap2 = getResizedBitmap(bitmap2, 400);
-
+                    //Set imagem
                     imageView.setImageBitmap(myBitmap);
-                    //BitMapToString(bitmap2);
                 }
 
             } catch (Exception e) {
@@ -133,14 +126,6 @@ public class ListaUploadAdaptador extends BaseAdapter {
                 width = (int) (height * bitmapRatio);
             }
             return Bitmap.createScaledBitmap(image, width, height, true);
-        }
-
-        public String BitMapToString(Bitmap userImage1) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            userImage1.compress(Bitmap.CompressFormat.PNG, 60, baos);
-            byte[] b = baos.toByteArray();
-            Document_img1 = Base64.encodeToString(b, Base64.DEFAULT);
-            return Document_img1;
         }
     }
 }
